@@ -18,40 +18,19 @@ firebase.analytics();
 firebase.functions().useFunctionsEmulator("http://localhost:5001");
 
 const App = () => {
-  const [todosCollection, loading, error] = useCollection(
-    firebase.firestore().collection("todos"),
+  const [user, loadingUser] = [
     {
-      snapshotListenOptions: { includeMetadataChanges: true },
-    }
-  );
-  const [user, loadingUser] = useAuthState(firebase.auth());
+      uid: "123",
+    },
+    false,
+  ];
 
-  const handleChangeComplete = (todoId, isComplete) => {
-    const ref = firebase.firestore().doc(`todos/${todoId}`);
-    ref.update({
-      isComplete: isComplete,
-    });
-  };
-  const handleSubmit = (text) => {
-    const newTodo = firebase.firestore().collection("todos").doc();
-    newTodo.set({
-      text,
-      author: {
-        uid: user.uid,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-      },
-    });
-  };
+  const [todosCollection, error, loading] = [{ docs: [] }];
 
-  const handleApprove = async (todoId) => {
-    try {
-      const approve = firebase.functions().httpsCallable("approve");
-      approve({
-        todoId,
-      });
-    } catch (e) {}
-  };
+  const handleChangeComplete = (todoId, isComplete) => {};
+  const handleSubmit = (text) => {};
+
+  const handleApprove = async (todoId) => {};
 
   if (!user && !loadingUser) {
     return (
