@@ -11,8 +11,41 @@ admin.initializeApp({
   databaseURL: "https://todo-blr-2020.firebaseio.com",
 });
 
-exports.hello = functions.https.onRequest(async (req, res) => {
-  res.send("Hello World");
+exports.helloNew = functions.https.onRequest(async (req, res) => {
+  res.send("Hello new World");
+});
+
+exports.shuffleApprover = functions.https.onCall(async (data, context) => {
+  const allUsersList = await admin.auth().listUsers();
+  const allUsers = allUsersList.users;
+  const todo = await admin
+    .firestore()
+    .collection("todos")
+    .doc(data.todoId)
+    .get();
+  const filteredUsers = allUsers.filter((user) => {
+    console.log(user);
+    console.log(context.auth);
+    console.log(todo.data());
+    return (
+      user.uid !== context.auth.uid && user.uid !== todo.data().approver.uid
+    );
+  });
+
+  const randomUser =
+    filteredUsers[Math.floor(Math.random() * filteredUsers.length)];
+
+  admin
+    .firestore()
+    .collection("todos")
+    .doc(data.todoId)
+    .update({
+      approver: {
+        uid: randomUser.uid,
+        displayName: randomUser.displayName,
+        photoURL: randomUser.photoURL,
+      },
+    });
 });
 
 exports.approve = functions.https.onCall(async (data, context) => {
@@ -37,7 +70,7 @@ exports.approve = functions.https.onCall(async (data, context) => {
             method: "POST",
             body: JSON.stringify({
               text: `\`\`\`${todo.data().text}\`\`\` was *approved* by _${
-                context.user.displayName
+                context.auth.displayName
               }_`,
             }),
           }
@@ -61,17 +94,17 @@ exports.approve = functions.https.onCall(async (data, context) => {
   }
 });
 
-exports.addApprover = functions.firestore
-  .document("todos/{todoId}")
-  .onCreate(async (snap) => {
-    const allUsersList = await admin.auth().listUsers();
-    const allUsers = allUsersList.users;
-    snap.ref.update({
-      approver: {
-        uid: randomUser.uid,
-        displayName: randomUser.displayName,
-        photoURL: randomUser.photoURL,
-      },
-    });
-  });
-const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
+// exports.addApprover = functions.firestore
+//   .document("todos/{todoId}")
+//   .onCreate(async (snap) => {
+//     const allUsersList = await admin.auth().listUsers();
+//     const allUsers = allUsersList.users;
+//     snap.ref.update({
+//       approver: {
+//         uid: randomUser.uid,
+//         displayName: randomUser.displayName,
+//         photoURL: randomUser.photoURL,
+//       },
+//     });
+//   });
+// const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];

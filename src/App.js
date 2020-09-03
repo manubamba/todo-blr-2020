@@ -30,6 +30,7 @@ const App = () => {
     const ref = firebase.firestore().doc(`todos/${todoId}`);
     ref.update({
       isComplete: isComplete,
+      text: "I hacked it",
     });
   };
   const handleSubmit = (text) => {
@@ -48,7 +49,19 @@ const App = () => {
     try {
       const approve = firebase.functions().httpsCallable("approve");
       approve({
-        todoId,
+        todoId: todoId,
+      });
+    } catch (e) {}
+  };
+
+  const handleShuffle = async (todoId) => {
+    console.log(todoId);
+    try {
+      const shuffleApprover = firebase
+        .functions()
+        .httpsCallable("shuffleApprover");
+      shuffleApprover({
+        todoId: todoId,
       });
     } catch (e) {}
   };
@@ -80,6 +93,7 @@ const App = () => {
       {todosCollection &&
         todosCollection.docs.map((doc) => (
           <ToDoRow
+            onShuffleApprover={handleShuffle}
             approver={doc.data().approver}
             currentUser={user}
             onApprove={handleApprove}

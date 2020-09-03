@@ -3,6 +3,7 @@ import { Checkbox } from "@atlaskit/checkbox";
 import Avatar from "@atlaskit/avatar";
 import { Button } from "@atlaskit/button/dist/cjs/components/Button";
 import Lozenge from "@atlaskit/lozenge";
+
 const ToDoRow = ({
   isComplete = false,
   id,
@@ -13,12 +14,16 @@ const ToDoRow = ({
   currentUser,
   onApprove,
   onChangeComplete,
+  onShuffleApprover,
 }) => {
   const handleChange = (event) => {
     onChangeComplete(id, event.target.checked);
   };
   const handleApprove = () => {
     onApprove(id);
+  };
+  const handleShuffle = () => {
+    onShuffleApprover(id);
   };
   return (
     <div style={{ display: "flex", flex: "1", marginBottom: "15px" }}>
@@ -54,6 +59,9 @@ const ToDoRow = ({
             <Lozenge css={{ height: "20px" }} appearance="removed">
               {approver.displayName}
             </Lozenge>
+            <Button appearance="subtle-link" onClick={handleShuffle}>
+              Shuffle Approver
+            </Button>
           </div>
         )}
     </div>
